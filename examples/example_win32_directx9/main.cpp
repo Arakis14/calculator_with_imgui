@@ -26,7 +26,7 @@ int main(int, char**)
     //ImGui_ImplWin32_EnableDpiAwareness();
     WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, _T("ImGui Example"), NULL };
     ::RegisterClassEx(&wc);
-    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Dear ImGui DirectX9 Example"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
+    HWND hwnd = ::CreateWindow(wc.lpszClassName, _T("Calculator with imgui"), WS_OVERLAPPEDWINDOW, 100, 100, 1280, 800, NULL, NULL, wc.hInstance, NULL);
 
     // Initialize Direct3D
     if (!CreateDeviceD3D(hwnd))
@@ -72,7 +72,7 @@ int main(int, char**)
 
     // Our state
     bool show_demo_window = true;
-    bool show_another_window = false;
+    bool show_advanced_window = false;
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     // Main loop
@@ -97,6 +97,35 @@ int main(int, char**)
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
 
+        //Calculator window
+        {
+            static char str0[128] = "";
+            static int result = 0;
+            ImGui::Begin("Calculator");
+
+
+
+            if (ImGui::Button("+", ImVec2(60, 60)))
+                str0[0] = 'a';
+            ImGui::SameLine();
+            if (ImGui::Button("-"))
+                str0[1] = 'b';
+            ImGui::Button("=");
+            ImGui::SmallButton("smol");
+
+            ImGui::Text("Result = %s", str0);
+            ImGui::InputText("input numbers", str0, IM_ARRAYSIZE(str0));
+
+            ImGui::Checkbox("Advanced", &show_advanced_window);
+            ImGui::End();
+        }
+
+        if (show_advanced_window)
+        {
+            ImGui::Begin("Advanced", &show_advanced_window);
+            ImGui::Text("Hello from another window!");
+            ImGui::End();
+        }
 
         // Rendering
         ImGui::EndFrame();
