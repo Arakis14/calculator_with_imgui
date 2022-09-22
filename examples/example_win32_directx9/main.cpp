@@ -7,6 +7,7 @@
 #include "imgui_impl_win32.h"
 #include <d3d9.h>
 #include <tchar.h>
+#include <sstream>
 
 // Data
 static LPDIRECT3D9              g_pD3D = NULL;
@@ -19,6 +20,18 @@ void CleanupDeviceD3D();
 void ResetDevice();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
+static void HelpMarker(const char* desc)
+{
+    ImGui::TextDisabled("(?)");
+    if (ImGui::IsItemHovered(ImGuiHoveredFlags_DelayShort))
+    {
+        ImGui::BeginTooltip();
+        ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+        ImGui::TextUnformatted(desc);
+        ImGui::PopTextWrapPos();
+        ImGui::EndTooltip();
+    }
+}
 // Main code
 int main(int, char**)
 {
@@ -101,20 +114,52 @@ int main(int, char**)
         {
             static char str0[128] = "";
             static int result = 0;
+            static int tempNumber = 0;
+            static std::stringstream temp;
             ImGui::Begin("Calculator");
 
-
-
-            if (ImGui::Button("+", ImVec2(60, 60)))
-                str0[0] = 'a';
+            ImGui::TextColored(ImVec4(1.0f, 0.0f, 1.0f, 1.0f), "Result = % d", result);
+            ImGui::InputText("input number", str0, IM_ARRAYSIZE(str0));
             ImGui::SameLine();
-            if (ImGui::Button("-"))
-                str0[1] = 'b';
-            ImGui::Button("=");
-            ImGui::SmallButton("smol");
-
-            ImGui::Text("Result = %s", str0);
-            ImGui::InputText("input numbers", str0, IM_ARRAYSIZE(str0));
+            HelpMarker(
+                "Usage:\n"
+                "Enter a number.\n"
+                "Click one of the buttons.\n"
+                "Enter a second number.\n"
+                "Click =.\n");
+            if (ImGui::Button("+", ImVec2(60, 60)))
+            {
+                temp << str0;
+                temp >> result;
+                temp.clear();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("-", ImVec2(60, 60)))
+            {
+                temp << '-';
+                temp << str0;
+                temp >> result;
+                temp.clear();
+            }
+            if (ImGui::Button("=", ImVec2(60, 60)))
+            {
+                temp << str0;
+                temp >> tempNumber;
+                if (tempNumber < 0) {
+                    result = result + tempNumber;
+                }
+                else { result = abs(result + tempNumber); }
+                temp.clear();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("C", ImVec2(60, 60)))
+            {
+                temp.clear();
+                result = 0;
+                tempNumber = 0;
+            }
+            if (ImGui::Button("Quit", ImVec2(60, 60)))
+                exit(EXIT_SUCCESS);
 
             ImGui::Checkbox("Advanced", &show_advanced_window);
             ImGui::End();
